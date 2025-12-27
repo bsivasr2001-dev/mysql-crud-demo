@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 MySQL CRUD Demo - Siva Sankar Reddy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .tabs { display: flex; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 10px; margin-bottom: 30px; }
+        .tab { flex: 1; padding: 15px; text-align: center; background: rgba(255,255,255,0.2); border: none; border-radius: 15px; color: white; cursor: pointer; transition: all 0.3s; font-weight: bold; }
+        .tab.active { background: white; color: #667eea; transform: scale(1.05); }
+        .tab-content { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); display: none; }
+        .tab-content.active { display: block; animation: slideIn 0.5s; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input, select, textarea { width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 10px; font-size: 16px; transition: border-color 0.3s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        .btn { padding: 15px 30px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin: 5px; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5a67d8; transform: translateY(-2px); }
+        .btn-danger { background: #f56565; color: white; }
+        .btn-danger:hover { background: #e53e3e; transform: translateY(-2px); }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid #e1e5e9; }
+        .table th { background: #f7fafc; font-weight: bold; color: #333; }
+        .table tr:hover { background: #f7fafc; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .badge-male { background: #63b3ed; color: white; }
+        .badge-female { background: #f472b6; color: white; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: rgba(255,255,255,0.9); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2.5em; font-weight: bold; color: #667eea; }
+        @media (max-width: 768px) { .tabs { flex-direction: column; } .table { font-size: 14px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 MySQL CRUD Demo</h1>
+            <p>Siva Sankar Reddy | ECE '24 | Full-Stack MySQL Operations</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div>Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="maleCount">0</div>
+                <div>Male Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="femaleCount">0</div>
+                <div>Female Users</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('create')">➕ CREATE (INSERT)</button>
+            <button class="tab" onclick="showTab('read')">📋 READ (SELECT)</button>
+            <button class="tab" onclick="showTab('update')">✏️ UPDATE</button>
+            <button class="tab" onclick="showTab('delete')">🗑️ DELETE</button>
+        </div>
+
+        <!-- CREATE Tab (INSERT) -->
+        <div id="create" class="tab-content active">
+            <h2>📝 CREATE New User (INSERT INTO users)</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label>ID:</label>
+                    <input type="number" id="createId" required>
+                </div>
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="createName" required>
+                </div>
+                <div class="form-group">
+                    <label>Salary:</label>
+                    <input type="number" step="0.01" id="createSalary" required>
+                </div>
+                <div class="form-group">
+                    <label>Hire Date:</label>
+                    <input type="date" id="createDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <select id="createGender" required>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="createEmail" required>
+                </div>
+                <button type="submit" class="btn btn-primary">✅ INSERT User</button>
+            </form>
+        </div>
+
+        <!-- READ Tab (SELECT) -->
+        <div id="read" class="tab-content">
+            <h2>📊 READ All Users (SELECT * FROM users)</h2>
+            <div id="usersTable"></div>
+        </div>
+
+        <!-- UPDATE Tab -->
+        <div id="update" class="tab-content">
+            <h2>✏️ UPDATE User</h2>
+            <form id="updateForm">
+                <div class="form-group">
+                    <label>Update ID:</label>
+                    <input type="number" id="updateId" required>
+                </div>
+                <div class="form-group">
+                    <label>New Salary:</label>
+                    <input type="number" step="0.01" id="updateSalary" required>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 UPDATE</button>
+            </form>
+        </div>
+
+        <!-- DELETE Tab -->
+        <div id="delete" class="tab-content">
+            <h2>🗑️ DELETE User</h2>
+            <form id="deleteForm">
+                <div class="form-group">
+                    <label>Delete ID:</label>
+                    <input type="number" id="deleteId" required>
+                </div>
+                <button type="submit" class="btn btn-danger">❌ DELETE User</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            if (tabName === 'read') loadUsers();
+        }
+
+        // Load users (SELECT)
+        async function loadUsers() {
+            try {
+                const response = await fetch('mysql_crud.php?action=read');
+                const users = await response.json();
+                displayUsers(users);
+                updateStats(users);
+            } catch (error) {
+                alert('❌ MySQL Connection Error: Start XAMPP!');
+            }
+        }
+
+        // Display users table
+        function displayUsers(users) {
+            const table = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Name</th><th>Salary</th><th>Hire Date</th><th>Gender</th><th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => `
+                            <tr>
+                                <td>${user.empno}</td>
+                                <td>${user.ename}</td>
+                                <td>₹${parseFloat(user.salary).toLocaleString()}</td>
+                                <td>${user.hire_date}</td>
+                                <td><span class="badge ${user.gender==='M' ? 'badge-male' : 'badge-female'}">${user.gender}</span></td>
+                                <td>${user.email}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('usersTable').innerHTML = table;
+        }
+
+        // Update stats
+        function updateStats(users) {
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('maleCount').textContent = users.filter(u => u.gender === 'M').length;
+            document.getElementById('femaleCount').textContent = users.filter(u => u.gender === 'F').length;
+        }
+
+        // CREATE (INSERT)
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            await fetch('mysql_crud.php?action=create', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            alert('✅ User INSERTED!');
+            loadUsers();
+            e.target.reset();
+        });
+
+        // UPDATE
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                empno: document.getElementById('updateId').value,
+                salary: document.getElementById('updateSalary').value
+            };
+            
+            await fetch('mysql_crud.php?action=update', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            alert('✅ User UPDATED!');
+            loadUsers();
+        });
+
+        // DELETE
+        document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const empno = document.getElementById('deleteId').value;
+            
+            await fetch(`mysql_crud.php?action=delete&empno=${empno}`);
+            alert('✅ User DELETED!');
+            loadUsers();
+        });
+
+        // Load initial data
+        loadUsers();
+    </script>
+</body>
+</html>
