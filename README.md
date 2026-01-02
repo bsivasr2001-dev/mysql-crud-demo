@@ -7,3 +7,5 @@
 **Full-stack MySQL CRUD website with modern glassmorphism UI. Real-time INSERT/SELECT/UPDATE/DELETE operations connected to live MySQL database via XAMPP/PHP.**
 
 ## ✨ **Live Features**
+
+ file:///C:/Users/Venkat/OneDrive/Desktop/Siva/bssr-task-manager/mysql%20project/mysql_demo.html
